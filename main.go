@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -10,6 +11,11 @@ import (
 )
 
 var logger *zap.Logger
+
+type DefaultResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
 
 func init() {
 	l, _ := zap.NewProduction()
@@ -28,17 +34,24 @@ func MyHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*event
 	logger.Info("recieved event", zap.Any("method", event.HTTPMethod), zap.Any("path", event.Path), zap.Any("body", event.Body))
 
 	if event.Path == "/hello" {
+		body, _ := json.Marshal(&DefaultResponse{
+			Status:  string(http.StatusOK),
+			Message: "hello world",
+		})
 		res = &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusOK,
-			Body:       "hello",
+			Body:       string(body),
 		}
 	} else {
+		body, _ := json.Marshal(&DefaultResponse{
+			Status:  string(http.StatusOK),
+			Message: "default path",
+		})
 		res = &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusOK,
-			Body:       "default",
+			Body:       string(body),
 		}
 	}
-
 	return res, nil
 }
 
