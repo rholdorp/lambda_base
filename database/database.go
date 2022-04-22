@@ -19,8 +19,8 @@ var (
 
 func GetConnection() (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s databas=%s sslmode=disable", host, port, user, password, database)
-	return sql.Open("postgress", psqlInfo)
+		"password=%s dbname=%s sslmode=disable", host, port, user, password, database)
+	return sql.Open("postgres", psqlInfo)
 }
 
 const createWeatherTableSQL = `
