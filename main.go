@@ -52,7 +52,7 @@ func MyHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*event
 
 	logger.Info("recieved event", zap.Any("method", event.HTTPMethod), zap.Any("path", event.Path), zap.Any("body", event.Body))
 
-	if event.Path == "/migrate" {
+	if event.Path == "/create" {
 		err := database.CreateWeatherTable(ctx, db)
 
 		if err != nil {
@@ -76,7 +76,20 @@ func MyHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*event
 			Body:       string(body),
 		}, nil
 
-	} else if event.Path == "/weatherlog" && event.HTTPMethod == http.MethodPost {
+	} else if event.Path == "/weather_entry" && event.HTTPMethod == http.MethodPost {
+		// err := json.Unmarshal([]byte(event.Body), &weatherlog)
+		tempf := event.QueryStringParameters["indoortempf"]
+
+		body, _ := json.Marshal(&DefaultResponse{
+			Status:  string(http.StatusOK),
+			Message: tempf,
+		})
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusOK,
+			Body:       string(body),
+		}, nil
+
+	} else if event.Path == "/weather" && event.HTTPMethod == http.MethodPost {
 		// create weather
 		weatherlog := &database.WeatherLog{}
 		err := json.Unmarshal([]byte(event.Body), &weatherlog)
@@ -115,7 +128,7 @@ func MyHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*event
 			Body:       string(body),
 		}, nil
 
-	} else if event.Path == "/weatherlog" && event.HTTPMethod == http.MethodGet {
+	} else if event.Path == "/weather" && event.HTTPMethod == http.MethodGet {
 		// get weather
 		weather, err := database.GetWeather(ctx, db)
 
